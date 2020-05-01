@@ -4,9 +4,14 @@ const scrapper = require('./scrapper')
 const app = express()
 
 app.get('/', async (req, res) => {
-  const html = await scrapper.scrap()
+  try {
+    const html = await scrapper.scrap()
 
-  res.status(200).send(html)
+    res.status(200).send(html)
+  } catch (error) {
+    res.send(error)
+  }
+  
 })
 
 app.listen(8001)
