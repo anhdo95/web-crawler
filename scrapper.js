@@ -1,6 +1,7 @@
 const requestPromise = require('request-promise');
 const $ = require('cheerio');
 const puppeteer = require('puppeteer');
+const download = require('download')
 
 // A static content website
 const WIKI_DOMAIN = 'https://en.wikipedia.org'
@@ -24,10 +25,14 @@ async function getSinglePresident(path) {
 
   const presidentName = $('#firstHeading', html).first().text()
   const presidentBirthDay = $('.bday', html).first().text()
+  const presidentAvatarUrl = `https:${$('.infobox.vcard .image > img', html).first().attr('src')}`
+
+  download(presidentAvatarUrl, 'images')
 
   return {
     presidentName,
-    presidentBirthDay
+    presidentBirthDay,
+    presidentAvatarUrl
   }
 }
 
