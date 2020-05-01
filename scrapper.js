@@ -45,16 +45,22 @@ module.exports.scrapRedditPosts = async function() {
   const url = `${REDDIT_DOMAIN}`
   const browser = await puppeteer.launch()
   const page = await browser.newPage()
+  page.setViewport({ width: 1280, height:720 });
 
-  await page.goto(url)
+  await page.goto(url, { waitUntil: 'networkidle2' })
   const html = await page.content()
 
-  const titles = []
+  const titles = await page.evaluate(() => {
+    const els = document.querySelectorAll('h3')
 
-  $('h3', html).each(function() {
-    const text = $(this).text()
-    titles.push(text)
+    return [...els].map(el => {
+      return {
+        title: el.textContent
+      }
+    })
   })
+
+  browser.close()
 
   return titles
 }
