@@ -3,15 +3,26 @@ const scrapper = require('./scrapper')
 
 const app = express()
 
-app.get('/', async (req, res) => {
+app.get('/us-presidents', async (req, res) => {
   try {
-    const html = await scrapper.scrap()
+    const presidents = await scrapper.scrapUSPresidents()
 
-    res.status(200).send(html)
+    res.status(200).send(presidents)
   } catch (error) {
-    res.send(error)
+    console.log('error', error)
+    res.end(error)
   }
-  
+})
+
+app.get('/reddit-posts', async (req, res) => {
+  try {
+    const posts = await scrapper.scrapRedditPosts()
+
+    res.status(200).send(posts)
+  } catch (error) {
+    console.log('error', error)
+    res.end(error)
+  }
 })
 
 app.listen(8001)

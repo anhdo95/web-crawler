@@ -1,10 +1,14 @@
 const requestPromise = require('request-promise');
 const $ = require('cheerio');
+const puppeteer = require('puppeteer');
 
-const DOMAIN = 'https://en.wikipedia.org'
+// A static content website
+const WIKI_DOMAIN = 'https://en.wikipedia.org'
+// A dynamic content website
+const REDDIT_DOMAIN = 'https://www.reddit.com'
 
 async function getPresidentUrls() {
-  const url = `${DOMAIN}/wiki/List_of_Presidents_of_the_United_States`
+  const url = `${WIKI_DOMAIN}/wiki/List_of_Presidents_of_the_United_States`
   const html = await requestPromise(url)
 
   const urlElements = $('.wikitable > tbody > tr > td:nth-child(4) > b > a', html)
@@ -15,7 +19,7 @@ async function getPresidentUrls() {
 }
 
 async function getSinglePresident(path) {
-  const url = `${DOMAIN}${path}`
+  const url = `${WIKI_DOMAIN}${path}`
   const html = await requestPromise(url)
 
   const presidentName = $('#firstHeading', html).first().text()
@@ -27,14 +31,30 @@ async function getSinglePresident(path) {
   }
 }
 
-module.exports.scrap = async function() {
-  return new Promise(async (resolve, reject) => {
-    const paths = await getPresidentUrls()
+module.exports.scrapUSPresidents = async function() {
+  const paths = await getPresidentUrls()
 
-    const presidents = await Promise.all(
-      paths.map(path => getSinglePresident(path))
-    )
+  const presidents = await Promise.all(
+    paths.map(path => getSinglePresident(path))
+  )
 
-    resolve(presidents)
+  return presidents
+}
+
+module.exports.scrapRedditPosts = async function() {
+  const url = `${REDDIT_DOMAIN}`
+  const browser = await puppeteer.launch()
+  const page = await browser.newPage()
+
+  await page.goto(url)
+  const html = await page.content()
+
+  const titles = []
+
+  $('h3', html).each(function() {
+    const text = $(this).text()
+    titles.push(text)
   })
+
+  return titles
 }
