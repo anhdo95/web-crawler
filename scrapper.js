@@ -14,10 +14,27 @@ async function getPresidentUrls() {
   }, [])
 }
 
+async function getSinglePresident(path) {
+  const url = `${DOMAIN}${path}`
+  const html = await requestPromise(url)
+
+  const presidentName = $('#firstHeading', html).first().text()
+  const presidentBirthDay = $('.bday', html).first().text()
+
+  return {
+    presidentName,
+    presidentBirthDay
+  }
+}
+
 module.exports.scrap = async function() {
   return new Promise(async (resolve, reject) => {
-    const urls = await getPresidentUrls()
+    const paths = await getPresidentUrls()
 
-    resolve(urls)
+    const presidents = await Promise.all(
+      paths.map(path => getSinglePresident(path))
+    )
+
+    resolve(presidents)
   })
 }
